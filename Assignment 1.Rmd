@@ -114,10 +114,10 @@ lapply(reduced_set, mean)
 Standard deviation
 ```{r}
 lapply(lapply(reduced_set, var),sqrt)
-df_status(Auto)
 ```
 
 (e) Using the full data set, investigate the predictors graphically, using scatterplots or other tools of your choice. Create some plots highlighting the relationships among the predictors. Comment on your findings.
+
 ```{r message=FALSE}
 library(ggplot2)
 library(ggbiplot)
@@ -131,13 +131,13 @@ ggplot(Auto) + geom_boxplot(aes(as.factor(Auto$cylinders), Auto$mpg)) + ggplot2:
 ggplot(Auto) + geom_boxplot(aes(as.factor(Auto$origin), Auto$mpg)) + ggplot2::xlab('origin') + ggplot2::ylab('MPG')+
     facet_wrap(facets = vars(Auto$cylinders)) + ggtitle('Faceted by cylinders')
 
-qplot(Auto$mpg, Auto$displacement)
+qplot(Auto$mpg, Auto$displacement,xlab = 'mpg',ylab = 'displacement')
 
-qplot(Auto$mpg, Auto$horsepower)
+qplot(Auto$mpg, Auto$horsepower,xlab = 'mpg',ylab = 'horsepower')
 
-qplot(Auto$mpg, Auto$weight)
+qplot(Auto$mpg, Auto$weight,xlab = 'mpg',ylab = 'weight')
 
-qplot(Auto$mpg, Auto$acceleration)
+qplot(Auto$mpg, Auto$acceleration,xlab = 'mpg',ylab = 'acceleration')
 
 fit = princomp(select(Auto, -'name'), cor=TRUE)
 ggbiplot(fit)
@@ -153,5 +153,5 @@ heatmap(data, Colv = NA, Rowv = hcd, scale="column")
 
 (f) Suppose that we wish to predict gas mileage (mpg) on the basis of the other variables. Do your plots suggest that any of the other variables might be useful in predicting mpg? Justify your answer.
 
-*Yes, from the biplot and the scatter plots there is quite a clear negative correlation between mpg and cylinders, displacement, horsepower and weight.  This is eluded to in the heatmap as well, leveraging a dendrogram to assist with order the matrix.  Looking at both the biplot and the heatmap, there seems to also be a weak positive relationship between mpg and origin, but I'd rather place my focus on the stronger negative correlations.  Logically there is some sence in the correlation between mpg, cylinders, displacement, horsepower and weight, confirmed upon visual inspection, but yet to be confirmed empirically.*
+Yes, from the biplot and the scatter plots there is quite a clear negative correlation between mpg and cylinders, displacement, horsepower and weight.  This is eluded to in the heatmap as well, leveraging a dendrogram to assist with order the matrix.  Considering the biplot and scatter plot, there seems to be a slightly weaker positive correlation between mpg and acceleration, but this positive relationship is not as strong as the negative relationships mentioned before.  Looking at both the biplot and the heatmap, there seems to also be a weak positive relationship between mpg and origin, but I'd rather place my focus on the stronger negative correlations.  Logically there is some sence in the correlation between mpg, cylinders, displacement, horsepower, acceleration and weight, confirmed upon visual inspection, but yet to be confirmed empirically.
 
