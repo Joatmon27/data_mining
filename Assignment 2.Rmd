@@ -1,0 +1,141 @@
+---
+title: "Data Mining - Assignment 2"
+author: "PW Janse van Rensburg - 15338673"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Question 3
+
+We now revisit the bias-variance decomposition.
+(a) Provide a sketch of typical (squared) bias, variance, training error, test error, and Bayes (or irreducible) error curves, on a single plot, as we go from less flexible statistical learning methods towards more flexible approaches. The x-axis should represent the amount of flexibility in the method, and the y-axis should represent the values for each curve. There should be five curves. Make sure to label each one. 
+
+```{r echo=FALSE}
+library(png)
+img = readPNG('bias_variance_trade_off.png')
+
+#get size
+h<-dim(img)[1]
+w<-dim(img)[2]
+
+#open new file for output
+par(mar=c(0,0,0,0), xpd=NA, mgp=c(0,0,0), oma=c(0,0,0,0), ann=F)
+plot.new()
+plot.window(0:1, 0:1)
+
+#fill plot with image
+usr<-par("usr")    
+rasterImage(img, usr[1], usr[3], usr[2], usr[4])
+```
+*Figure 1 - Bias-variance trade off in classical statistics*
+
+(b) Explain why each of the five curves has the shape displayed in part (a).
+
+As model complexity increases, the model learns the landscape of the data it is training on and it will fit the shape of the data exactly as far as possible.  It tends to give an overly optimistic error rate.  As model complexity increases, it tends to overfit the data and produce the overly optimistic error rate mentioned before.
+This contrasts the test error rate, where with increased complexity of the model and overfitting, the model generalizes terribly eventually.  Initial error rates tend to decrease up to the point where the model starts to overfit, where error rates on the test set will start to increase as the model gains more complexity.  This is the bias variance trade-off.  The better the model fits the training data, the worse it will generalize to unseen data.  The less flexible the method, the more robust it is in generalizing and the close the error rate will be on the train and test data sets (but generally the worse the overall error rate).  It should be noted that with the modern phenomena of deep double descent in the ML field, the bias-variance trade-off argument falls slightly flat.  The deep double descent phenomena applies itself on model size (i.e. model complexity), but also epoch-wise (model training time).
+Back to the *Figure 1*, the irreducible error, also known as the Bayes error rate, will always be the lowest possible error rate, since the Bayes classifier will always predict the class for which $P(Y=j|X=x_p)$ is largest.
+
+## Question 7
+
+The table below provides a training data set containing six observations, three predictors, and one qualitative response variable.
+```{r echo=FALSE}
+library(knitr)
+data = matrix(c(1,0,3,0,'Red',2,2,0,0,'Red',3,0,1,3,'Red',4,0,1,2,'Green',5,-1,0,1,'Green',6,1,1,1,'Red'),byrow = TRUE,ncol = 5)
+colnames(data) = c('Obs','X1','X2','X3','Y')
+kable(data)
+```
+
+Suppose we wish to use this data set to make a prediction for Y when $X_1 = X_2 = X_3 = 0$ using K-nearest neighbors.
+
+(a) Compute the Euclidean distance between each observation and the test point, $X_1 = X_2 = X_3 = 0$.
+
+```{r}
+x = c(0,0,0)
+dist(rbind(data[1,2:4],x))
+dist(rbind(data[2,2:4],x))
+dist(rbind(data[3,2:4],x))
+dist(rbind(data[4,2:4],x))
+dist(rbind(data[5,2:4],x))
+dist(rbind(data[6,2:4],x))
+```
+
+(b) What is our prediction with K = 1? Why?
+We will consider the single closest neighbour to be the classification, with this being observation 5, which amounts to *Green*.
+
+(c) What is our prediction with K = 3? Why?
+We consider the 3 closest neighbours, this being observations 2,5 and 6.  From here we calculate the probabilities for each class.  For red, we have $P(Red) = \frac{2}{3}$ and for green we have $P(Green) = \frac{1}{3}$.  The highest probability is red, so we classify it as *Red*.
+
+(d) If the Bayes decision boundary in this problem is highly nonlinear, then would we expect the best value for K to be large or small? Why?
+
+For a highly nonlinear decision boundary, we would expect K to be smaller.  For a small K, the method is more flexible and results in a low-bias, high-variance classifier.  Smaller K leads to a non-linear, overly flexible decision boundary, which would fit closely with a nonlinear Bayes decision boundary.
+
+## Question 10
+
+This exercise involves the Boston housing data set.
+(a) To begin, load in the Boston data set. The Boston data set is part of the MASS library in R.
+```{r eval=FALSE}
+> library(MASS)
+```
+Now the data set is contained in the object Boston.
+```{r eval=FALSE}
+> Boston
+```
+Read about the data set:
+```{r eval=FALSE}
+> ?Boston
+```
+How many rows are in this data set? How many columns? What do the rows and columns represent?
+
+```{r warning=FALSE, message=FALSE}
+library(MASS)
+library(funModeling)
+dim(Boston)
+df_status(Boston)
+```
+
+We can see the Boston dataset has 14 columns and 506 rows.  The dataset is housing values in suburbs of Boston, with each row representing a suburb and each column representing some information point of that suburb, such as crime rate, nitrogen oxide concentraion, average numbers of rooms per dwelling etc.
+
+```{r warning=FALSE, message=FALSE}
+library(funModeling)
+df_status(Boston)
+```
+Looking at the distribution of variables, we see all variables are either numeric/integer.  rad is the index of accessibility to radial highways.  It only has 9 unique values so we are not too sure if it should be a factor variable rather, but without further info, it will be treated as if the integer value has mathematical meaning (it is ordinal).
+
+(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+```{r warning=FALSE, message=FALSE}
+pairs(boston_data[,1:4])
+title(main = "Pairwise plots of crim, zn, indus, chas")
+```
+Very weak relationship between zn (proportion of residential land zoned for lots over 25,000 sq.ft) and indus (proportion of non-retail business acres per town).  This is expected as if there is more residential land zoned, there is less land available for non-retail business. There does not seem to be any further relationships of interest with the initial pairwise plots.  We move on.
+```{r}
+pairs(boston_data[,5:8])
+title(main = "Pairwise plots of nox, rm, age, dis")
+```
+This seems a bit more telling.  We can start to see some form of relationship between age (proportion of owner-occupied units built prior to 1940) and nox (nitrogen oxides concentration (parts per 10 million)).  This relationship is weak and without further understanding of the Boston area is difficult to interpret.  We see a similarly weak relationship between dis (weighted mean of distances to five Boston employment centres) and nox.  Assuming employment centres refers to more industrial areas, this makes sense as nitrogen oxides are produced in combustion processes, partly from nitrogen compounds in the fuel, but mostly by direct combination of atmospheric oxygen and nitrogen in flames, so we expect this to be higher as you move closer to industrial areas.
+```{r}
+pairs(boston_data[,9:13])
+title(main = "Pairwise plots of rad, tax, ptratio, black, lstat")
+```
+Again, no clear patterns.  Closest to a relationship is ptratio (pupil-teacher ratio by town) and tax (full-value property-tax rate per \$10,000).  We expect there to be at least some semblance of a relationship between these two, but it appears to be a very weak relationship.
+(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
+```{r}
+pairs(boston_data[c(1,3,5,6,7)])
+title(main = "Pairwise plots of crim, indus, nox, rm, age")
+```
+```{r}
+pairs(boston_data[c(1,8:13)])
+title(main = "Pairwise plots of crim, indus, nox, rm, age")
+```
+We can see a relationship between crime and rad (index of accessibility to radial highways), crime and tax and crime and dis.  
+
+(e) How many of the suburbs in this data set bound the Charles river?
+```{r}
+```
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+```{r}
+```
+(g) Which suburb of Boston has lowest median value of owneroccupied homes? What are the values of the other predictors
+for that suburb, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
+```{r}
+```
