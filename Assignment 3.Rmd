@@ -1,0 +1,180 @@
+---
+title: "Data Mining - Assignment 3"
+author: "PW Janse van Rensburg - 15338673"
+output:
+  html_document:
+    df_print: paged
+---
+## Question 2
+
+Carefully explain the differences between the KNN classifier and KNN regression methods.
+
+*The codomain of a KNN regression model is a continuous space, e.g. $\mathbb{R}$ whereas for a KNN classification model the codomain is a discrete space, e.g. {0,1}. Also, KNN regression tries to predict the value of the output variable by using a local average, whereas KNN classification attempts to predict the class to which the output variable belong by computing the local probability.*
+
+## Question 3
+
+Suppose we have a data set with five predictors, $X_1$ =GPA, $X_2$ = IQ, $X_3$ = Gender (1 for Female and 0 for Male), $X_4$ = Interaction between GPA and IQ, and $X_5$ = Interaction between GPA and Gender. The response is starting salary after graduation (in thousands of dollars). Suppose we use least squares to fit the model, and get $\hat\beta_0 = 50$, $\hat\beta_1 = 20$, $\hat\beta_2 = 0.07$, $\hat\beta_3 = 35$, $\hat\beta_4 = 0.01$, $\hat\beta_5 = −10$.
+
+(a) Which answer is correct, and why?
+
+i. For a fixed value of IQ and GPA, males earn more on average than females.
+
+ii. For a fixed value of IQ and GPA, females earn more on average than males.
+
+iii. For a fixed value of IQ and GPA, males earn more on average than females provided that the GPA is high enough. 
+
+iv. For a fixed value of IQ and GPA, females earn more on average than males provided that the GPA is high enough.
+
+*This is not as straighforward as it might seem, so bear with me.  Considering a research report by Dr Stuart Rojstaczer, the average GPA in 2013 in private schools were just above 3.3, whereas in public schools it was just below 3.1 and averaging across all schools it leaves the average GPA between 3.1 and 3.2.  This implies that according to this model, feamles earn more on average than males.  However comparing the models when considering the only difference is gender, it leaves us the gender variable, with a coefficient of 35 and the interaction variable $X_5$ with a coefficient of -10.*
+
+*As gender is a binary variable it will amount to a 0 for a male and 35 for a female, and similarly for the $X_5$ variable, it will be -10 times whatever the GPA is.  So if the GPA is above 3.5, it will cancel out the positive effect of the gender variable on its own.*
+
+(b) Predict the salary of a female with IQ of 110 and a GPA of 4.0.
+
+```{r}
+y = 50+20*4+0.07*110+35+0.01*110*4-10*4
+y
+```
+
+(c) True or false: Since the coefficient for the GPA/IQ interaction term is very small, there is very little evidence of an interaction effect. Justify your answer.
+
+*False, the significance is not determined by the coefficient but rather by comparing the calculated value to the critical value as determined by whichever method one chooses to test the hypothesis $H_0: \beta_4=0$*
+
+## Question 4
+
+I collect a set of data (n = 100 observations) containing a single predictor and a quantitative response. I then fit a linear regression model to the data, as well as a separate cubic regression, i.e. $Y = β_0 + β_1X_1 + β_2X_2 + β_3X_3 + \epsilon$. 
+
+(a) Suppose that the true relationship between X and Y is linear, i.e. $Y = β_0 + β_1X + \epsilon$. Consider the training residual sum of squares (RSS) for the linear regression, and also the training RSS for the cubic regression. Would we expect one to be lower than the other, would we expect them to be the same, or is there not enough information to tell? Justify your answer.
+
+*One would expect the RSS for the linear regression to be lower than the cubic regression, seeing as it constitutes the true relationship, implying it is a better fit for of the data.*
+
+(b) Answer (a) using test rather than training RSS.
+
+*One would expect the linear regression's RSS for the test data to be lower than the cubic regression's RSS.  As the linear model fits the data better, one would expect it to generalize better as well.*
+
+(c) Suppose that the true relationship between X and Y is not linear, but we don’t know how far it is from linear. Consider the training RSS for the linear regression, and also the training RSS for the cubic regression. Would we expect one to be lower than the other, would we expect them to be the same, or is there not enough information to tell? Justify your answer.
+
+*There is not enough information to say.  If the relationship strays from one trend, without knowing how far it strays towards the other, it is impossible to say which will look better.*
+
+(d) Answer (c) using test rather than training RSS.
+
+*There is not enough information to say.  If the relationship strays from one trend, without knowing how far it strays towards the other, it is impossible to say which will look better.*
+
+## Question 14
+
+This problem focuses on the collinearity problem.
+
+(a) Perform the following commands in R:
+```{r}
+set.seed(1)
+x1=runif(100)
+x2 =0.5*x1+rnorm(100)/10
+y=2+2*x1 +0.3*x2+rnorm(100)
+```
+The last line corresponds to creating a linear model in which y is a function of x1 and x2. Write out the form of the linear model. What are the regression coefficients?
+
+$$
+\begin{align}
+y &= 2+2x_1+0.3x_2+\epsilon\\
+&=2+2x_1+0.3(0.5x_1+0.1\epsilon)+\epsilon\\
+&=2+2.15x_1+1.03\epsilon
+\end{align}
+$$
+
+where $\epsilon \sim N(0,1)$ and the coefficient for $x_1$ is 2.15.
+
+(b) What is the correlation between x1 and x2? Create a scatterplot displaying the relationship between the variables.
+
+```{r}
+library(ggplot2)
+cor(x1,x2)
+qplot(x1,x2)
+```
+
+(c) Using this data, fit a least squares regression to predict y using x1 and x2. Describe the results obtained. What are $\hat\beta_0,\hat\beta_1$, and $\hat\beta_2$? How do these relate to the true $\beta_0,\beta_1$, and$\beta_2$? Can you reject the null hypothesis $H_0:\beta_1=0$? How about the null hypothesis $H_0:\beta_2=0$?
+
+```{r}
+model1 = glm(y~x1+x2)
+summary(model1)
+```
+
+We obtain a model of the following form:
+$y=2.1305+1.4396x_1+1.0097x_2$
+
+Considering that $x_2$ is a function of $x_1$, they relate relatively closely, along with the intercept.  Considering the p-values, we can see that for $H_0:\beta_2=0$ we do not have enough evidence to reject $H_0$ and consider $x_2$ to not be a significant parameter.
+When considering the intercept, we see it is significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_1=0$ we have a p-value of 0.0487 which is less than 0.05 and we therefore reject $H_0$ and consider $x_1$ to be a significant parameter.
+
+(d) Now fit a least squares regression to predict y using only x1.  Comment on your results. Can you reject the null hypothesis $H_0:\beta_1=0$?
+
+```{r}
+model2 = glm(y~x1)
+summary(model2)
+```
+
+Considering that $x_2$ is a function of $x_1$, dropping it out the estimates move closer to the original, true parameters.  When considering the intercept, we see it is significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_1=0$ we also have a p-value < 0.0005 and we therefore reject $H_0$ and consider $x_1$ to be a significant parameter.
+
+(e) Now fit a least squares regression to predict y using only x2.  Comment on your results. Can you reject the null hypothesis $H_0:\beta_1=0$?
+
+```{r}
+model3 = glm(y~x2)
+summary(model3)
+```
+
+Considering that $x_2$ is a function of $x_1$, estimating only on the $x_2$ we see the estimates moving further away from the true ones.  When considering the intercept, we see it is significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_2=0$ we also have a p-value < 0.0005 and we therefore reject $H_0$ and consider $x_2$ to be a significant parameter.
+
+(f) Do the results obtained in (c)–(e) contradict each other? Explain your answer.
+
+Yes, we had $x_2$ as a function of $x_1$, where when considering them both in the model, $x_2$ was deemed not significant whereas when considering each variable in turn in the model, they were each seperately considered significant.  This is obviously due to the high correlation between the two variables.
+
+(g) Now suppose we obtain one additional observation, which was unfortunately mismeasured. 
+```{r eval=FALSE}
+x1=c(x1 , 0.1)
+x2=c(x2 , 0.8)
+y=c(y,6)
+```
+Re-fit the linear models from (c) to (e) using this new data. What effect does this new observation have on the each of the models? In each model, is this observation an outlier? A high-leverage point? Both? Explain your answers.
+```{r}
+model1 = (y~x1+x2)
+summary(model1)
+par(mfrow=c(2,2))
+plot(model1)
+rstudent(model1)[abs(rstudent(model1))>2]
+par(mfrow=c(1,1))
+plot(hatvalues (model1))
+which.max(hatvalues(model1))
+```
+We now obtain a model of the following form:
+$y=2.2267+0.5394x_1+2.5146x_2$
+
+This swops the entire model around in terms of significance and coefficients.  Considering the p-values, we can see that for $H_0:\beta_1=0$ we do not have enough evidence to reject $H_0$ and consider $x_1$ to not be a significant parameter.
+When considering the intercept, we see it is still significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_2=0$ we have a p-value of 0.00614 which is less than 0.05 and we therefore reject $H_0$ and consider $x_2$ to be a significant parameter.
+
+We can see that based on the hatvalues, the new entry has high leverage and considering the studentized residuals, it is an outlier as well, a dangerous combination.  It would best be advised to exclude it.
+
+
+```{r}
+model2 = lm(y~x1)
+summary(model2)
+par(mfrow=c(2,2))
+plot(model2)
+rstudent(model2)[abs(rstudent(model2))>2]
+par(mfrow=c(1,1))
+plot(hatvalues(model2))
+which.max(hatvalues(model2))
+```
+Estimating only on the $x_1$ we see a similar trend as before.  When considering the intercept, we see it is significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_1=0$ we also have a p-value < 0.0005 and we therefore reject $H_0$ and consider $x_1$ to be a significant parameter.  For this model, we can see that the new entry is indeed an outlier, but it doesn't have high leverage, so not as dangerous a combination.  We also observe it to not be the only outlier.
+
+
+```{r}
+model3 = lm(y~x2)
+summary(model3)
+par(mfrow=c(2,2))
+plot(model3)
+rstandard(model3)[abs(rstandard(model3))>2]
+rstudent(model3)[abs(rstudent(model3))>2]
+par(mfrow=c(1,1))
+plot(hatvalues(model3))
+which.max(hatvalues(model3))
+```
+
+Estimating only on the $x_2$, again we see a similar trend as before.  When considering the intercept, we see it is significant, with a p-value < 0.0005 and for the hypothesis $H_0:\beta_2=0$ we also have a p-value < 0.0005 and we therefore reject $H_0$ and consider $x_2$ to be a significant parameter.  We observe the point to have high leverage, but not to be an outlier.
