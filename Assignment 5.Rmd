@@ -1,0 +1,203 @@
+---
+title: "Data Mining - Assignment 5"
+author: "PW Janse van Rensburg - 15338673"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## Question 2
+
+It was stated in the text that classifying an observation to the class for which (4.12) is largest is equivalent to classifying an observation to the class for which (4.13) is largest. Prove that this is the case. In other words, under the assumption that the observations in the kth class are drawn from a $N(\mu_k, \sigma^2)$ distribution, the Bayes' classifier assigns an observation to the class for which the discriminant function is maximized.
+
+$$
+p_{k}(x) = \frac{\pi_{k}\frac{1}{\sqrt{2\pi\sigma}}e^{(-\frac{1}{2\sigma^2}(x-\mu_k)^2)}}{\sum^{k}_{l=1}\pi_{l}\frac{1}{\sqrt{2\pi\sigma}}e^{(-\frac{1}{2\sigma^2}(x-\mu_l)^2)}}
+$$
+
+*For LDA (Linear Discriminant Analysis) the assumption is that the variable $X$ is a vector $X = (x_1,x_2, ..., x_p)$ ~ $N(\mu_k, \sigma)$.  Assuming we know the prior distribution $P(Y=k) = \pi_k$ then we can find the posterior distribution using Bayes:*
+
+$$
+p_k(x) = p(Y=k|X=x) = \frac{f_k(x)\pi_k}{P(X=x)}
+= Cf_k(x)\pi_k
+$$
+*Since $P(X=x)$ does not depend on k, it translates to a constant C.*
+
+$$
+\begin{aligned}
+\therefore p_k(x) &= p(Y=k|X=x) = Cf_k(x)\pi_k \\
+&=c\pi_k\frac{1}{\sqrt{2\pi\sigma}}e^{(-\frac{(x-\mu_k)^2)}{2\sigma^2})}\\
+&=c`\pi_ke^{(-\frac{(x-\mu_k)^2)}{2\sigma^2}}\\
+log(p_k(x)) &= log(c`\pi_ke^{(-\frac{(x-\mu_k)^2)}{2\sigma^2}})\\
+&= log(c`) + log(\pi_k) -\frac{(x-\mu_k)^2)}{2\sigma^2}
+\end{aligned}
+
+$$
+
+*Since log(c`) does not depend on k it can be ignored, as we want to maximise the posterior over k:*
+
+$$
+\begin{aligned}
+ log(\pi_k) -\frac{(x-\mu_k)^2)}{2\sigma^2} &= log(\pi_k) -\frac{(x^2-2x\mu_k+\mu_k^2)^2)}{2\sigma^2} \\
+&= -\frac{x^2}{2\sigma^2} + log(\pi_k) + x\frac{\mu_k}{\sigma^2} - \frac{\mu_k^2}{2\sigma^2} \\
+&= c``+log(\pi_k) + \frac{x\mu_k}{\sigma^2}-\frac{\mu^2_k}{2\sigma^2}\\
+\therefore \delta_k(x) &= log(\pi_k)+\frac{x\mu_k}{\sigma^2}-\frac{\mu^2_k}{2\sigma^2}
+\end{aligned}
+
+$$
+
+## Question 3
+This problem relates to the QDA model, in which the observations within each class are drawn from a normal distribution with a classspecific mean vector and a class specific covariance matrix. We consider the simple case where p = 1; i.e. there is only one feature. Suppose that we have K classes, and that if an observation belongs to the kth class then X comes from a one-dimensional normal distribution, $X$~$N(\mu_k,\sigma^2_k)$. Recall that the density function for the one-dimensional normal distribution is given in (4.11). Prove that in this case, the Bayes' classifier is not linear. Argue that it is in fact quadratic.
+
+*Bayes states that:*
+$$
+P(Y=k|X=x) = \frac{\pi_kf_k(x)}{\sum^k_{l=1}\pi_lf_l(x)}
+$$
+
+*Since the denominator does not depend on k:*
+$$
+\begin{aligned}
+\hat{y} &= argmax_{k=\{1,..,k\}}p(y=k|x)\\
+&= argmax_{k=\{1,..,k\}}p(y=x|k)p(k)\\
+&= argmax_{k=\{1,..,k\}}log(p(y=x|k)p(k))
+\end{aligned}
+$$
+*Evaluating the log term:*
+$$
+\begin{aligned}
+log(p(y=x|k)p(k)) &= log(p(k)) + log(p(x|k))\\
+&= -\frac{1}{2}(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)-\frac{1}{2}log|\Sigma_k|+log(\pi_k)+c\\
+\delta_k(x) &= -\frac{1}{2}x^T\Sigma^{-1}_kx + x^T\Sigma^{-1}_k\mu_k-\frac{1}{2}\mu^T_k\Sigma^{-1}_k\mu_k-\frac{1}{2}log|\Sigma_k|+log(\mu_k)+c
+\end{aligned}
+$$
+
+## Question 5
+We now examine the differences between LDA and QDA.
+(a) If the Bayes decision boundary is linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+(b) If the Bayes decision boundary is non-linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+(c) In general, as the sample size n increases, do we expect the test prediction accuracy of QDA relative to LDA to improve, decline,or be unchanged? Why?
+(d) True or False: Even if the Bayes decision boundary for a given problem is linear, we will probably achieve a superior test error rate using QDA rather than LDA because QDA is flexible enough to model a linear decision boundary. Justify your answer.
+
+### a)
+*QDA Will perform better on the training set as it is more flexible and can therfore fit the data better.  However, if the Bayes decision boundary is linear, LDA will outperform QDA on unseen data (or the test set) as QDA will likely overfit the data (however this can be controlled for, but speaking in general this will be the case).*
+
+### b)
+*QDA will perform better on the training AND test set due to the Bayes decision boundary being non-linear*
+
+### c)
+*In general QDA may overfit on small samples and perform better on large samples.  We'd expect the test error to reduce as the sample size increases for QDA relative to LDA, due to the flexible nature of QDA and it will therefore more closely match the Bayes decision boundary.*
+
+### d)
+*False - depending on the size of the dataset, LDA might outperform QDA.  For small datasets, QDA might overfit the data and therefore we can expec LDA to have a lower test error rate (since the decision boundary is linear)*
+
+## Question 7
+Suppose that we wish to predict whether a given stock will issue a dividend this year ("Yes" or "No") based on X, last year's percent profit.We examine a large number of companies and discover that the mean value of X for companies that issued a dividend was $\bar{X} = 10$, while the mean for those that didn't was $\bar{X} = 0$. In addition, the variance of X for these two sets of companies was ^$\hat{\sigma^2} = 36$. Finally, 80% of companies issued dividends. Assuming that X follows a normal distribution, predict the probability that a company will issue a dividend this year given that its percentage profit was X = 4 last year.
+
+$$
+\begin{aligned}
+P(Y=k|X=x) &= \frac{\pi_kf_k(x)}{\sum^k_{l=1}\pi_lf_l(x)}\\
+P(Y=1|X=4)&= \frac{0.8\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}}{0.8\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}+0.2\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}}\\
+&= \frac{0.8\frac{1}{\sqrt{72\pi}}e^{-\frac{(-6)^2}{72}}}{0.8\frac{1}{\sqrt{72\pi}}e^{-\frac{(-6)^2}{72}}+0.2\frac{1}{\sqrt{72\pi}}e^{-\frac{(-6)^2}{72}}} \\
+&= \frac{0.8\frac{1}{226.19}(0.6065)}{0.8\frac{1}{226.19}(0.6065)+0.2\frac{1}{226.19}(0.6065)}\\
+&=0.7955
+\end{aligned}
+$$
+
+## Question 8
+Suppose that we take a data set, divide it into equally-sized training and test sets, and then try out two different classification procedures. First we use logistic regression and get an error rate of 20% on the training data and 30% on the test data. Next we use 1-nearest neighbors (i.e. K = 1) and get an average error rate (averaged over both test and training data sets) of 18%. Based on these results, which method should we prefer to use for classification of new observations? Why?
+
+*An average error rate for logistic regression is $\frac{20+30)}{2}=25\%$ and the test error rate is 30%.  In the case of KNN with K=1 we have $P(Y=j|X=x_i) = (y_i=j)$ which is equal to 1 if $y_i = j$ and 0 if not.  With this setting we do not make any error $(P_{training}) = 0\%$ because for any training obs its nearest neighbour will be the response itself.  So the KNN with k=1 has a test error rate of 36%.  We would based on this choose logistic regression as the test error is lower (30%)*
+
+## Question 10
+
+This question should be answered using the Weekly data set, which is part of the ISLR package. This data is similar in nature to the Smarket data from this chapter's lab, except that it contains 1, 089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+```{r echo=FALSE}
+library(ISLR)
+library(MASS)
+
+my_Weekly_data <- Weekly
+
+```
+### a) 
+Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+
+```{r}
+head(my_Weekly_data)
+```
+
+```{r}
+summary(my_Weekly_data)
+```
+
+```{r}
+any(is.na(my_Weekly_data))
+```
+### b)
+Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+
+```{r}
+lr_mod <- glm(Direction ~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,family=binomial(link='logit'),data=my_Weekly_data)
+summary(lr_mod)
+```
+*It appears that only Lag2 is statistically significant with a relatively low p-value (<0.05) and a model should likely be refit using only lag2 as an input variable.*
+### c)
+Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+
+```{r}
+lr_pred <- predict(lr_mod, my_Weekly_data)
+lr_class <- ifelse(lr_pred>0.5,'Up','Down')
+table(lr_class, my_Weekly_data$Direction)
+mean(lr_class == my_Weekly_data$Direction)
+```
+It appears the model does worse than random guessing, with a correct prediction rate < 0.5.  I would have delved into specificity and sensitivity etc. if I had more time, but just in general the model is not performing great.
+
+### d) 
+Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+```{r}
+train_Weekly_data <- dplyr::filter(my_Weekly_data, Year <= 2008)
+test_Weekly_data <- dplyr:: filter(my_Weekly_data, Year > 2008)
+unique(train_Weekly_data$Year)
+unique(test_Weekly_data$Year)
+
+```
+
+### e)
+Repeat (d) using LDA
+
+```{r}
+lda_mod <- lda(Direction ~ Lag2, data = train_Weekly_data)
+lda_mod
+lda_pred <- predict(lda_mod, test_Weekly_data)
+lda_class <- lda_pred$class
+table(lda_class, test_Weekly_data$Direction)
+mean(lda_class == test_Weekly_data$Direction)
+```
+
+### f) 
+Repeat (d) using QDA
+```{r}
+qda_mod <- qda(Direction ~ Lag2, data = train_Weekly_data)
+qda_mod
+qda_pred <- predict(qda_mod, test_Weekly_data)
+qda_class <- qda_pred$class
+table(qda_class, test_Weekly_data$Direction)
+mean(qda_class == test_Weekly_data$Direction)
+```
+
+### g) 
+Repeat for KNN model with K = 1 (1 nearest neighbour). 
+```{r}
+library (class)
+train.X <- as.data.frame(train_Weekly_data$Lag2) 
+test.X <- as.data.frame(test_Weekly_data$Lag2)
+train.Direction <- train_Weekly_data$Direction
+knn.pred <- knn(train = train.X, test = test.X, cl = train.Direction, k = 1)
+table(knn.pred , test_Weekly_data$Direction)
+mean(knn.pred == test_Weekly_data$Direction)
+```
+
+### h) 
+Which of these methods appears to provide the best results on this data?
+*In this case the LDA model performed best with the highest percentage of correct predictions: 62.5% *
+*It may be that K = 1 results in an overly flexible fit because for the test set it could only predict accurately for 50.96%, which is only slightly better than random guessing. The QDA model perform slighly worse with accuracy of 58.65% compared to the LDA model.*
